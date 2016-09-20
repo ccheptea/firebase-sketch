@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "957596922300",
+    "firebase_url": "https://fir-sketch.firebaseio.com",
+    "project_id": "fir-sketch",
+    "storage_bucket": "fir-sketch.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:957596922300:android:8eeb2151edc9ab68",
+        "android_client_info": {
+          "package_name": "com.cheptea.cc.firebasesketch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "957596922300-2agjmgqr21vascg56rj310a7nr3i03ga.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbrwMoi4GWoDexrRWkoS6N260W63Xjsd8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
