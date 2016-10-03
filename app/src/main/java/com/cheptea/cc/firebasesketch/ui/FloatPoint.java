@@ -2,7 +2,7 @@ package com.cheptea.cc.firebasesketch.ui;
 
 /**
  * A class representing a point with float values as coordinates.
- *
+ * <p>
  * Created by constantin.cheptea on 06/09/16.
  */
 public class FloatPoint {
@@ -12,6 +12,10 @@ public class FloatPoint {
 	public FloatPoint(float x, float y) {
 		this.x = x;
 		this.y = y;
+	}
+
+	public FloatPoint offset(float dx, float dy) {
+		return new FloatPoint(x + dx, y + dy);
 	}
 
 	@Override

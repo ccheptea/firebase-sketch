@@ -2,6 +2,8 @@ package com.cheptea.cc.firebasesketch.models;
 
 import android.support.annotation.NonNull;
 
+import com.google.firebase.database.Exclude;
+
 /**
  * Created by constantin.cheptea on 19/09/16.
  */
@@ -11,7 +13,9 @@ public class SketchPoint {
 	private float y;
 	private Type type;
 
-	public enum Type {START, JOINT, END}
+	public SketchPoint() {
+		// needed for Firebase
+	}
 
 	public SketchPoint(float x, float y, @NonNull Type type) {
 		this.x = x;
@@ -35,12 +39,25 @@ public class SketchPoint {
 		this.y = y;
 	}
 
-	public Type getType() {
+	public String getType() {
+		return this.type.name();
+	}
+
+	@Exclude
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	@Exclude
+	public Type getTypeValue() {
 		return type;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setType(String typeString) {
+		if (typeString == null)
+			this.type = null;
+		else
+			this.type = Type.valueOf(typeString);
 	}
 
 	@Override
@@ -71,5 +88,9 @@ public class SketchPoint {
 		result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
 		result = 31 * result + (type != null ? type.hashCode() : 0);
 		return result;
+	}
+
+	public enum Type {
+		START, JOINT, END
 	}
 }

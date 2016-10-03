@@ -2,6 +2,7 @@ package com.cheptea.cc.firebasesketch;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -21,7 +22,9 @@ import com.cheptea.cc.firebasesketch.models.SketchPoint;
 import com.cheptea.cc.firebasesketch.ui.FloatPoint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A very simple drawing pad.
@@ -32,48 +35,39 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 
 	private static final String LOG_TAG = Pad.class.getSimpleName();
 
-	private static final float RADIUS = 30;
 	private static final long FRAME_RATE = 1000 / 36;
 
-	private static final float PAPER_WIDTH = 1; // inch
-	private static final float PAPER_HEIGHT = 1; // inch
+	private static final float PAPER_WIDTH = 5; // inch
+	private static final float PAPER_HEIGHT = 5; // inch
+	private static final float LINE_STROKE_WIDTH = 0.02f; // inch
 
-	private List<Path> paths = new ArrayList<>();
-	private Path path = null;
-
-
-	private Paint backgroundPaint;
-	private Paint paperPaint;
+	private final Map<String, Path> paths = new HashMap<>();
+	private final List<String> pathsToRemove = new ArrayList<>();
+	//	private FloatPoint paperDimenPixels;
+	private final float paperMargin = 0.1f; // inch
+	private Paint grayLayerPaint;
+	private Paint whiteLayerPaint;
 	private Paint drawPaint;
-
 	private PadThread padThread;
-
 	private DisplayMetrics displayMetrics;
-
 	private LineTransferListener lineTransferListener;
-
 	private float xOffset = 0;
 	private float yOffset = 0;
-
 	private float oldXOffset = 0;
 	private float oldYOffset = 0;
-
 	private float xMoveLast;
 	private float yMoveLast;
-
 	private float xCenter;
 	private float yCenter;
-
-	private RectF background = new RectF();
-	private RectF paper = new RectF();
-
-	private FloatPoint paperDimenPixels;
-
-	private final int backgroundMargin = 30;
+	private Bitmap cacheBitmap;
+	private Canvas cacheCanvas;
 
 	private ControlState controlState = ControlState.DRAW;
 
-	public enum ControlState {MOVE, DRAW}
+	private float cacheBitmapXPos;
+	private float cacheBitmapYPos;
+
+	private float testCircleRadius;
 
 	public Pad(Context context) {
 		super(context);
@@ -97,28 +91,45 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 	}
 
 	private void init() {
-		backgroundPaint = new Paint();
-		backgroundPaint.setColor(0xffeeeeee);
-		backgroundPaint.setStyle(Paint.Style.FILL);
-
-		paperPaint = new Paint();
-		paperPaint.setColor(0xffffffff);
-		paperPaint.setStyle(Paint.Style.FILL);
-
-		drawPaint = new Paint();
-		drawPaint.setColor(Color.BLACK);
-		drawPaint.setStrokeWidth(10);
-		drawPaint.setStyle(Paint.Style.STROKE);
-
 		displayMetrics = new DisplayMetrics();
 		WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
 		windowManager.getDefaultDisplay().getMetrics(displayMetrics);
 
-		paperDimenPixels = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(PAPER_WIDTH, PAPER_HEIGHT));
+		float strokeWidth = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(LINE_STROKE_WIDTH, LINE_STROKE_WIDTH)).x;
+		testCircleRadius = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(0.05f, 0.05f)).x;
+
+		grayLayerPaint = new Paint();
+		grayLayerPaint.setColor(0xffeeeeee);
+		grayLayerPaint.setStyle(Paint.Style.FILL);
+
+		whiteLayerPaint = new Paint();
+		whiteLayerPaint.setColor(0xffffffff);
+		whiteLayerPaint.setStyle(Paint.Style.FILL);
+
+		drawPaint = new Paint();
+		drawPaint.setColor(Color.BLACK);
+		drawPaint.setStrokeWidth(strokeWidth);
+		drawPaint.setStyle(Paint.Style.STROKE);
+
+		createCacheBitmap();
 
 		setOnTouchListener(this);
 
 		getHolder().addCallback(this);
+	}
+
+	private void createCacheBitmap() {
+		FloatPoint paperDimenPixels = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(PAPER_WIDTH, PAPER_HEIGHT));
+		FloatPoint paperMargins = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(paperMargin, paperMargin));
+
+		cacheBitmap = Bitmap.createBitmap((int) (paperDimenPixels.x + paperMargins.x * 2), (int) (paperDimenPixels.y + paperMargins.y * 2), Bitmap.Config.RGB_565);
+
+		RectF grayLayer = new RectF(0, 0, paperDimenPixels.x + paperMargins.x * 2, paperDimenPixels.y + paperMargins.y * 2);
+		RectF whiteLayer = new RectF(paperMargins.x, paperMargins.y, grayLayer.right - paperMargins.x, grayLayer.bottom - paperMargins.y);
+
+		cacheCanvas = new Canvas(cacheBitmap);
+		cacheCanvas.drawRect(grayLayer, grayLayerPaint);
+		cacheCanvas.drawRect(whiteLayer, whiteLayerPaint);
 	}
 
 	public void setControlState(ControlState controlState) {
@@ -134,20 +145,41 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-		background.offset(xOffset - oldXOffset, yOffset - oldYOffset);
-		paper.offset(xOffset - oldXOffset, yOffset - oldYOffset);
+		cacheBitmapXPos = xCenter - cacheBitmap.getWidth() / 2 + xOffset;
+		cacheBitmapYPos = yCenter - cacheBitmap.getHeight() / 2 + yOffset;
 
-		canvas.drawRect(background, backgroundPaint);
-		canvas.drawRect(paper, paperPaint);
-		canvas.drawCircle(xCenter + xOffset, yCenter + yOffset, 20, drawPaint);
+		canvas.drawBitmap(cacheBitmap, cacheBitmapXPos, cacheBitmapYPos, null);
 
-		for (Path path : paths) {
+		drawAll(canvas);
+	}
+
+	private void drawAll(Canvas canvas) {
+		canvas.drawCircle(xCenter + xOffset, yCenter + yOffset, testCircleRadius, drawPaint);
+
+		for (Path path : paths.values()) {
 			path.offset(xOffset - oldXOffset, yOffset - oldYOffset);
 			canvas.drawPath(path, drawPaint);
 		}
 
+		cacheIfNeeded();
+
 		oldXOffset = xOffset;
 		oldYOffset = yOffset;
+	}
+
+	public void cacheIfNeeded() {
+		if (pathsToRemove.size() > 0) {
+			// cache lines
+			synchronized (pathsToRemove) {
+				for (String lineKey : pathsToRemove) {
+					Path path = paths.get(lineKey);
+					path.offset(-cacheBitmapXPos, -cacheBitmapYPos);
+					cacheCanvas.drawPath(path, drawPaint);
+					paths.remove(lineKey);
+				}
+				pathsToRemove.clear();
+			}
+		}
 	}
 
 	@Override
@@ -155,34 +187,17 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 		super.onSizeChanged(w, h, oldw, oldh);
 		xCenter = w / 2;
 		yCenter = h / 2;
-
-		background.set(
-				xCenter - paperDimenPixels.x / 2 - backgroundMargin,
-				yCenter - paperDimenPixels.y / 2 - backgroundMargin,
-				xCenter + paperDimenPixels.x / 2 + backgroundMargin,
-				yCenter + paperDimenPixels.y / 2 + backgroundMargin);
-		paper.set(
-				xCenter - paperDimenPixels.x / 2,
-				yCenter - paperDimenPixels.y / 2,
-				xCenter + paperDimenPixels.x / 2,
-				yCenter + paperDimenPixels.y / 2);
-
-		if (paper.top >= backgroundMargin) background.top = 0;
-		if (paper.left >= backgroundMargin) background.left = 0;
-		if (paper.right <= w - backgroundMargin) background.right = w;
-		if (paper.bottom <= h - backgroundMargin) background.bottom = h;
 	}
 
 	@Override
 	public boolean onTouch(View view, MotionEvent event) {
-
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				if (controlState == ControlState.MOVE) {
 					xMoveLast = event.getX();
 					yMoveLast = event.getY();
 				} else {
-					createAndSendSketchPoint(event.getX() + xOffset, event.getY() + yOffset, SketchPoint.Type.START);
+					createAndSendSketchPoint(event, SketchPoint.Type.START);
 				}
 				break;
 			case MotionEvent.ACTION_MOVE:
@@ -196,19 +211,22 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 						yMoveLast = event.getY();
 					}
 				} else {
-					createAndSendSketchPoint(event.getX() + xOffset, event.getY() + yOffset, SketchPoint.Type.JOINT);
+					createAndSendSketchPoint(event, SketchPoint.Type.JOINT);
 				}
 				break;
 			case MotionEvent.ACTION_UP:
 				if (controlState == ControlState.DRAW) {
-					createAndSendSketchPoint(event.getX() + xOffset, event.getY() + yOffset, SketchPoint.Type.END);
+					createAndSendSketchPoint(event, SketchPoint.Type.END);
 				}
 				break;
 		}
 		return true;
 	}
 
-	private void createAndSendSketchPoint(float xPx, float yPx, SketchPoint.Type type) {
+	private void createAndSendSketchPoint(MotionEvent event, SketchPoint.Type type) {
+		// real distance = distance from center to event + move offset
+		float xPx = event.getX() - xCenter - xOffset;
+		float yPx = event.getY() - yCenter - yOffset;
 		if (lineTransferListener != null) {
 			FloatPoint point = DimensionsUtil.convertPointToInches(displayMetrics, new FloatPoint(xPx, yPx));
 			SketchPoint sketchPoint = new SketchPoint(point.x, point.y, type);
@@ -219,57 +237,60 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 
 	private boolean moveWithinHorizontalBounds(MotionEvent motionEvent) {
 		float xOffset = this.xOffset + motionEvent.getX() - xMoveLast;
-		float backgroundWidth = background.right - background.left;
-
-		return Math.abs(xOffset) < (backgroundWidth - getWidth()) / 2;
+		return Math.abs(xOffset) < (cacheBitmap.getWidth() - getWidth()) / 2;
 	}
 
 	private boolean moveWithinVerticalBounds(MotionEvent motionEvent) {
 		float yOffset = this.yOffset + motionEvent.getY() - yMoveLast;
-		float backgroundHeight = background.bottom - background.top;
-		return Math.abs(yOffset) < (backgroundHeight - getHeight()) / 2;
+		return Math.abs(yOffset) < (cacheBitmap.getHeight() - getHeight()) / 2;
 	}
 
 	@Override
-	public void onPrintNewPoint(SketchPoint sketchPoint) {
+	public void onPrintNewPoint(String lineKey, SketchPoint sketchPoint) {
 		FloatPoint pointIn = new FloatPoint(sketchPoint.getX(), sketchPoint.getY());
-		FloatPoint pointPx = DimensionsUtil.convertPointToPixels(displayMetrics, pointIn);
+		FloatPoint pointPx = DimensionsUtil
+				.convertPointToPixels(displayMetrics, pointIn)
+				.offset(xCenter + xOffset, yCenter + yOffset);
 
-		switch (sketchPoint.getType()) {
+		switch (sketchPoint.getTypeValue()) {
 			case START:
-				onBeginLine(pointPx);
+				onBeginLine(lineKey, pointPx);
 				break;
 			case JOINT:
-				onContinueLine(pointPx);
+				onContinueLine(lineKey, pointPx);
 				break;
 			case END:
-				onEndLine(pointPx);
+				onEndLine(lineKey, pointPx);
+				break;
 			default:
 				Log.e(LOG_TAG, "No Print Command " + sketchPoint.getType() + " Found");
 		}
 	}
 
-	private void onBeginLine(FloatPoint pointPixels) {
-		path = new Path();
-		path.moveTo(pointPixels.x - xOffset, pointPixels.y - yOffset);
-		paths.add(path);
+	private void onBeginLine(String lineKey, FloatPoint pointPixels) {
+		Path path = new Path();
+		path.moveTo(pointPixels.x, pointPixels.y);
+		paths.put(lineKey, path);
 	}
 
-	private void onContinueLine(FloatPoint pointPixels) {
-		path.lineTo(pointPixels.x - xOffset, pointPixels.y - yOffset);
+	private void onContinueLine(String lineKey, FloatPoint pointPixels) {
+		paths.get(lineKey).lineTo(pointPixels.x, pointPixels.y);
 	}
 
-	private void onEndLine(FloatPoint pointPixels) {
-		path.lineTo(pointPixels.x, pointPixels.y);
+	private void onEndLine(String lineKey, FloatPoint pointPixels) {
+		paths.get(lineKey).lineTo(pointPixels.x, pointPixels.y);
+		synchronized (pathsToRemove) {
+			pathsToRemove.add(lineKey);
+		}
 	}
-
-	// region surface
 
 	@Override
 	public void surfaceCreated(SurfaceHolder surfaceHolder) {
 		padThread = new PadThread(this);
 		padThread.start();
 	}
+
+	// region surface
 
 	@Override
 	public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
@@ -281,17 +302,18 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 		padThread.stop = true;
 	}
 
+	public enum ControlState {MOVE, DRAW}
+
 	// endregion surface
 
 	//region classes
 
 	private static class PadThread extends Thread {
 
+		Pad pad;
 		private boolean stop = false;
 
-		SurfaceView pad;
-
-		public PadThread(SurfaceView pad) {
+		PadThread(Pad pad) {
 			this.pad = pad;
 		}
 
@@ -308,7 +330,6 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				//Log.d("PadThread", "New Frame at " + System.currentTimeMillis());
 			}
 		}
 	}
