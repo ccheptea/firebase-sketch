@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="20dp">
+
+	<EditText
+		android:id="@+id/title"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:ems="10"
+		android:hint="@string/label_title"
+		android:inputType="text"/>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/element_space_large"
+		android:orientation="horizontal"
+		android:weightSum="4">
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:text="@string/label_input_width"/>
+
+		<Spinner
+			android:id="@+id/width_spinner"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="@dimen/element_space_large"
+			android:layout_weight="1"
+			android:entries="@array/document_default_sizes"/>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="@dimen/element_space_large"
+			android:layout_weight="1"
+			android:text="@string/label_input_height"/>
+
+		<Spinner
+			android:id="@+id/height_spinner"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:entries="@array/document_default_sizes"/>
+	</LinearLayout>
+</LinearLayout>

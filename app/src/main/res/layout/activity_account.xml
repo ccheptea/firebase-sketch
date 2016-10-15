@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+	<include layout="@layout/toolbar"/>
+
+	<LinearLayout
+		android:id="@+id/login_form"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+		android:layout_margin="@dimen/list_item_padding"
+		android:orientation="vertical"
+		android:padding="@dimen/list_item_padding"
+		android:visibility="gone">
+
+		<EditText
+			android:id="@+id/input_email"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="@string/hint_email"
+			android:inputType="textEmailAddress"/>
+
+		<EditText
+			android:id="@+id/input_password"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_space_large"
+			android:hint="password"
+			android:inputType="textPassword"/>
+
+		<com.joanzapata.iconify.widget.IconButton
+			android:id="@+id/btn_sign_in"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_space_large"
+			android:background="@drawable/btn_primary_selector"
+			android:text="@string/btn_sign_in"
+			android:textColor="@color/white"/>
+
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_space_medium"
+			android:gravity="center"
+			android:text="@string/label_or"/>
+
+		<com.joanzapata.iconify.widget.IconButton
+			android:id="@+id/btn_sign_up"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_space_large"
+			android:background="@drawable/btn_secondary_selector"
+			android:text="@string/btn_sign_up"
+			android:textColor="@color/white"/>
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/account_info"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+		android:orientation="vertical"
+		android:padding="@dimen/list_item_padding">
+
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:text="@string/label_logged_in"
+			android:textSize="@dimen/text_small"/>
+
+		<TextView
+			android:id="@+id/display_name"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_space_extra_large"
+			android:gravity="center"
+			android:text="cheptea.constantin@gmail.com"
+			android:textSize="@dimen/text_medium"
+			android:textStyle="bold"/>
+
+		<com.joanzapata.iconify.widget.IconButton
+			android:id="@+id/btn_sign_out"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_space_extra_large"
+			android:background="@drawable/btn_secondary_selector"
+			android:text="@string/btn_sign_out"
+			android:textColor="@color/white"/>
+	</LinearLayout>
+
+</RelativeLayout>

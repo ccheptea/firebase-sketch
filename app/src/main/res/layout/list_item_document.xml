@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:card_view="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/card_content"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginLeft="@dimen/element_space_large"
+	android:layout_marginRight="@dimen/element_space_large"
+	android:layout_marginTop="@dimen/element_space_medium"
+	android:clickable="true"
+	android:focusable="true"
+	android:foreground="?android:attr/selectableItemBackground"
+	card_view:cardCornerRadius="@dimen/cardview_default_radius"
+	card_view:cardElevation="3dp"
+	card_view:cardUseCompatPadding="false">
+
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+		<TextView
+			android:id="@+id/title"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_toLeftOf="@+id/btn_options"
+			android:paddingBottom="0dp"
+			android:paddingLeft="@dimen/list_item_padding"
+			android:paddingRight="@dimen/list_item_padding"
+			android:paddingTop="@dimen/list_item_padding"
+			android:text="TextView"
+			android:textSize="@dimen/text_size_document_title"
+			android:textStyle="normal|bold"
+			tools:text="Document Title"/>
+
+		<com.joanzapata.iconify.widget.IconTextView
+			android:id="@+id/btn_options"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_above="@+id/linearLayout"
+			android:layout_alignParentEnd="true"
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true"
+			android:gravity="center"
+			android:paddingLeft="@dimen/element_space_large"
+			android:paddingRight="@dimen/element_space_large"
+			android:text="{fa-ellipsis-v}"/>
+
+		<LinearLayout
+			android:id="@+id/linearLayout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/title"
+			android:orientation="horizontal"
+			android:paddingBottom="@dimen/list_item_padding"
+			android:paddingLeft="@dimen/list_item_padding"
+			android:paddingRight="@dimen/list_item_padding"
+			android:paddingTop="@dimen/element_space_medium">
+
+			<TextView
+				android:id="@+id/size"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="4 x 4"
+				android:textColor="@color/subtitle"
+				android:textSize="@dimen/text_size_document_subtitle"/>
+
+			<TextView
+				android:id="@+id/date"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="end"
+				android:text="06.06.2016"
+				android:textColor="@color/subtitle"
+				android:textSize="@dimen/text_size_document_subtitle"/>
+		</LinearLayout>
+
+	</RelativeLayout>
+
+
+</android.support.v7.widget.CardView>

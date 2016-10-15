@@ -1,4 +1,4 @@
-package com.cheptea.cc.firebasesketch;
+package com.cheptea.cc.firebasesketch.widgets;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -18,8 +18,12 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.cheptea.cc.firebasesketch.listeners.LinePrinterListener;
+import com.cheptea.cc.firebasesketch.listeners.LineTransferListener;
 import com.cheptea.cc.firebasesketch.models.SketchPoint;
+import com.cheptea.cc.firebasesketch.ui.DimensionsUtil;
 import com.cheptea.cc.firebasesketch.ui.FloatPoint;
+import com.cheptea.cc.firebasesketch.ui.SizeF;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,20 +35,16 @@ import java.util.Map;
  * <p/>
  * Created by constantin.cheptea on 17/07/16.
  */
-public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener, LinePrinterListener {
+public class SketchPad extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener, LinePrinterListener {
 
-	private static final String LOG_TAG = Pad.class.getSimpleName();
+	private static final String LOG_TAG = SketchPad.class.getSimpleName();
 
 	private static final long FRAME_RATE = 1000 / 36;
-
-	private static final float PAPER_WIDTH = 5; // inch
-	private static final float PAPER_HEIGHT = 5; // inch
 	private static final float LINE_STROKE_WIDTH = 0.02f; // inch
-
 	private final Map<String, Path> paths = new HashMap<>();
 	private final List<String> pathsToRemove = new ArrayList<>();
-	//	private FloatPoint paperDimenPixels;
 	private final float paperMargin = 0.1f; // inch
+	private SizeF paperSize = new SizeF(5, 5);
 	private Paint grayLayerPaint;
 	private Paint whiteLayerPaint;
 	private Paint drawPaint;
@@ -67,25 +67,23 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 	private float cacheBitmapXPos;
 	private float cacheBitmapYPos;
 
-	private float testCircleRadius;
-
-	public Pad(Context context) {
+	public SketchPad(Context context) {
 		super(context);
 		init();
 	}
 
-	public Pad(Context context, AttributeSet attrs) {
+	public SketchPad(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
 
-	public Pad(Context context, AttributeSet attrs, int defStyleAttr) {
+	public SketchPad(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		init();
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	public Pad(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+	public SketchPad(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
 		super(context, attrs, defStyleAttr, defStyleRes);
 		init();
 	}
@@ -96,7 +94,6 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 		windowManager.getDefaultDisplay().getMetrics(displayMetrics);
 
 		float strokeWidth = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(LINE_STROKE_WIDTH, LINE_STROKE_WIDTH)).x;
-		testCircleRadius = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(0.05f, 0.05f)).x;
 
 		grayLayerPaint = new Paint();
 		grayLayerPaint.setColor(0xffeeeeee);
@@ -119,7 +116,7 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 	}
 
 	private void createCacheBitmap() {
-		FloatPoint paperDimenPixels = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(PAPER_WIDTH, PAPER_HEIGHT));
+		FloatPoint paperDimenPixels = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(paperSize.getWidth(), paperSize.getHeight()));
 		FloatPoint paperMargins = DimensionsUtil.convertPointToPixels(displayMetrics, new FloatPoint(paperMargin, paperMargin));
 
 		cacheBitmap = Bitmap.createBitmap((int) (paperDimenPixels.x + paperMargins.x * 2), (int) (paperDimenPixels.y + paperMargins.y * 2), Bitmap.Config.RGB_565);
@@ -141,6 +138,16 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 		this.lineTransferListener = lineTransferListener;
 	}
 
+	/**
+	 * Recreates the entire paper. Make sure to call it only once and before drawing anything;
+	 *
+	 * @param paperSize
+	 */
+	public void setPaperSize(SizeF paperSize) {
+		this.paperSize = paperSize;
+		createCacheBitmap();
+	}
+
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -149,12 +156,6 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 		cacheBitmapYPos = yCenter - cacheBitmap.getHeight() / 2 + yOffset;
 
 		canvas.drawBitmap(cacheBitmap, cacheBitmapXPos, cacheBitmapYPos, null);
-
-		drawAll(canvas);
-	}
-
-	private void drawAll(Canvas canvas) {
-		canvas.drawCircle(xCenter + xOffset, yCenter + yOffset, testCircleRadius, drawPaint);
 
 		for (Path path : paths.values()) {
 			path.offset(xOffset - oldXOffset, yOffset - oldYOffset);
@@ -299,7 +300,9 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-		padThread.stop = true;
+		synchronized (padThread.okToDraw) {
+			padThread.okToDraw = false;
+		}
 	}
 
 	public enum ControlState {MOVE, DRAW}
@@ -310,23 +313,26 @@ public class Pad extends SurfaceView implements SurfaceHolder.Callback, View.OnT
 
 	private static class PadThread extends Thread {
 
-		Pad pad;
-		private boolean stop = false;
+		SketchPad pad;
+		private Boolean okToDraw = true;
 
-		PadThread(Pad pad) {
+		PadThread(SketchPad pad) {
 			this.pad = pad;
 		}
 
 		@Override
 		public void run() {
-			while (!stop) {
+			while (okToDraw) {
 				Canvas canvas = pad.getHolder().lockCanvas();
 				synchronized (pad.getHolder()) {
 					pad.postInvalidate();
 				}
+				if (okToDraw) {
+					pad.getHolder().unlockCanvasAndPost(canvas);
+				}
+
 				try {
 					sleep(FRAME_RATE);
-					pad.getHolder().unlockCanvasAndPost(canvas);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

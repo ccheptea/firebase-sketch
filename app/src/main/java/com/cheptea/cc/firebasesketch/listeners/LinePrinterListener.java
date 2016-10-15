@@ -1,4 +1,4 @@
-package com.cheptea.cc.firebasesketch;
+package com.cheptea.cc.firebasesketch.listeners;
 
 import com.cheptea.cc.firebasesketch.models.SketchPoint;
 

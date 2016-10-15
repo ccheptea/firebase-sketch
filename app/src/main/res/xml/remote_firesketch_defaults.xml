@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+	<entry>
+		<key>test_config</key>
+		<value>Hello Remote Config</value>
+	</entry>
+	<entry>
+		<key>document_sizes</key>
+		<value>2,3,4</value>
+	</entry>
+	<entry>
+		<key>document_size_item_selected</key>
+		<value>1</value>
+	</entry>
+</defaultsMap>

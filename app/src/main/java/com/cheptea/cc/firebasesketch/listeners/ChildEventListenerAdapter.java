@@ -1,4 +1,4 @@
-package com.cheptea.cc.firebasesketch;
+package com.cheptea.cc.firebasesketch.listeners;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;

@@ -1,3 +1,30 @@
 <resources>
 	<string name="app_name">FirebaseSketch</string>
+	<string name="title_documents">Documents</string>
+	<string name="item_login">Login</string>
+	<string name="item_create_document">Create document</string>
+	<string name="menu_item_rename_document">Rename</string>
+	<string name="menu_item_delete_document">Delete</string>
+
+	<string name="template_size">%1$d x %2$d</string>
+	<string name="btn_create">Create</string>
+	<string name="btn_cancel">Cancel</string>
+	<string name="btn_rename">Rename</string>
+
+	<string name="label_input_width">Width:</string>
+	<string name="label_input_height">Height:</string>
+	<string name="label_title">Title</string>
+
+	<string name="title_create_document">Create document</string>
+	<string name="title_new_title">New title</string>
+	<string name="title_default_document_title">Untitled sketch</string>
+	<string name="hint_email">your.email@example.com</string>
+	<string name="btn_sign_in">Sign in</string>
+	<string name="title_account">Account</string>
+	<string name="label_or">or</string>
+	<string name="btn_sign_up">Sign up</string>
+	<string name="label_logged_in">You are logged in as</string>
+	<string name="btn_sign_out">Sign out</string>
+	<string name="title_progress">Please wait...</string>
+	<string name="label_sign_in_progress">Signing in</string>
 </resources>
