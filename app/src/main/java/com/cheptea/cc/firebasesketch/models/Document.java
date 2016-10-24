@@ -3,6 +3,8 @@ package com.cheptea.cc.firebasesketch.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.firebase.database.Exclude;
+
 /**
  * Sketch Document specs.
  * Created by constantin.cheptea on 03/10/16.
@@ -20,11 +22,13 @@ public class Document implements Parcelable {
 			return new Document[size];
 		}
 	};
-	private String key;
+	@Exclude
+	private String key; // used only locally, not need to duplicate it in the database
 	private String title;
 	private int width; // inch
 	private int height; // inch
 	private long date;
+	private int likes;
 
 	public Document() {
 
@@ -36,6 +40,7 @@ public class Document implements Parcelable {
 		width = in.readInt();
 		height = in.readInt();
 		date = in.readLong();
+		likes = in.readInt();
 	}
 
 	public String getKey() {
@@ -78,6 +83,14 @@ public class Document implements Parcelable {
 		this.date = date;
 	}
 
+	public int getLikes() {
+		return likes;
+	}
+
+	public void setLikes(int likes) {
+		this.likes = likes;
+	}
+
 	@Override
 	public String toString() {
 		return "Document{" +
@@ -86,6 +99,7 @@ public class Document implements Parcelable {
 				", width=" + width +
 				", height=" + height +
 				", date=" + date +
+				", likes=" + likes +
 				'}';
 	}
 
@@ -101,5 +115,6 @@ public class Document implements Parcelable {
 		dest.writeInt(width);
 		dest.writeInt(height);
 		dest.writeLong(date);
+		dest.writeInt(likes);
 	}
 }

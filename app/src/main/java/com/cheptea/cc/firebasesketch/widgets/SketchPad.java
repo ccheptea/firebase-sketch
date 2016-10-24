@@ -148,6 +148,12 @@ public class SketchPad extends SurfaceView implements SurfaceHolder.Callback, Vi
 		createCacheBitmap();
 	}
 
+	public void clearDocument() {
+		paths.clear();
+		pathsToRemove.clear();
+		createCacheBitmap();
+	}
+
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -194,7 +200,7 @@ public class SketchPad extends SurfaceView implements SurfaceHolder.Callback, Vi
 	public boolean onTouch(View view, MotionEvent event) {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				if (controlState == ControlState.MOVE) {
+				if (ControlState.MOVE.equals(controlState)) {
 					xMoveLast = event.getX();
 					yMoveLast = event.getY();
 				} else {
@@ -202,7 +208,7 @@ public class SketchPad extends SurfaceView implements SurfaceHolder.Callback, Vi
 				}
 				break;
 			case MotionEvent.ACTION_MOVE:
-				if (controlState == ControlState.MOVE) {
+				if (ControlState.MOVE.equals(controlState)) {
 					if (moveWithinHorizontalBounds(event)) {
 						xOffset += event.getX() - xMoveLast;
 						xMoveLast = event.getX();
@@ -211,12 +217,12 @@ public class SketchPad extends SurfaceView implements SurfaceHolder.Callback, Vi
 						yOffset += event.getY() - yMoveLast;
 						yMoveLast = event.getY();
 					}
-				} else {
+				} else if (ControlState.DRAW.equals(controlState)) {
 					createAndSendSketchPoint(event, SketchPoint.Type.JOINT);
 				}
 				break;
 			case MotionEvent.ACTION_UP:
-				if (controlState == ControlState.DRAW) {
+				if (ControlState.DRAW.equals(controlState)) {
 					createAndSendSketchPoint(event, SketchPoint.Type.END);
 				}
 				break;
@@ -305,7 +311,7 @@ public class SketchPad extends SurfaceView implements SurfaceHolder.Callback, Vi
 		}
 	}
 
-	public enum ControlState {MOVE, DRAW}
+	public enum ControlState {MOVE, DRAW, ERASE}
 
 	// endregion surface
 

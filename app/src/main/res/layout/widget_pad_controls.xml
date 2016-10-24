@@ -32,7 +32,7 @@
 		android:textSize="@dimen/tool_icon_size"/>
 
 	<com.joanzapata.iconify.widget.IconTextView
-		android:id="@+id/btn_messages"
+		android:id="@+id/btn_erase_all"
 		android:layout_width="@dimen/tool_button_side"
 		android:layout_height="@dimen/tool_button_side"
 		android:layout_alignParentEnd="true"

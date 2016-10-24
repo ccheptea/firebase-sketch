@@ -21,7 +21,7 @@
 	<color name="paper_margin">#eee</color>
 
 	<!-- favourite button -->
-	<color name="favourite_on_default">#ffd176</color>
+	<color name="favourite_on_default">#f9ce79</color>
 	<color name="favourite_off_default">#fff</color>
 
 	<color name="btn_primary">#4ab43c</color>

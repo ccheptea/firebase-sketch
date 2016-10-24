@@ -55,6 +55,29 @@ public class DocumentsActivity extends AppCompatActivity implements
 	DatabaseReference documentsRef = FirebaseDatabase.getInstance().getReference("documents");
 	DatabaseReference linesRef = FirebaseDatabase.getInstance().getReference("lines");
 
+	ChildEventListenerAdapter documentsListener = new ChildEventListenerAdapter() {
+		@Override
+		public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+			Document document = dataSnapshot.getValue(Document.class);
+			document.setKey(dataSnapshot.getKey());
+			onDocumentInserted(document);
+		}
+
+		@Override
+		public void onChildRemoved(DataSnapshot dataSnapshot) {
+			Document document = dataSnapshot.getValue(Document.class);
+			document.setKey(dataSnapshot.getKey());
+			onDocumentRemoved(document);
+		}
+
+		@Override
+		public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+			Document document = dataSnapshot.getValue(Document.class);
+			document.setKey(dataSnapshot.getKey());
+			onDocumentChanged(document);
+		}
+	};
+
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -69,32 +92,20 @@ public class DocumentsActivity extends AppCompatActivity implements
 		documentsListView.setLayoutManager(new LinearLayoutManager(this));
 		documentsListView.setAdapter(documentsAdapter);
 
-		documentsRef.addChildEventListener(new ChildEventListenerAdapter() {
-			@Override
-			public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-				Document document = dataSnapshot.getValue(Document.class);
-				document.setKey(dataSnapshot.getKey());
-
-				documents.add(document);
-				documentsAdapter.notifyDataSetChanged();
-			}
-
-			@Override
-			public void onChildRemoved(DataSnapshot dataSnapshot) {
-				Document document = dataSnapshot.getValue(Document.class);
-				document.setKey(dataSnapshot.getKey());
-				onDocumentRemoved(document);
-			}
-
-			@Override
-			public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-				Document document = dataSnapshot.getValue(Document.class);
-				document.setKey(dataSnapshot.getKey());
-				onDocumentChanged(document);
-			}
-		});
+		documentsRef.addChildEventListener(documentsListener);
 
 		initRemoteConfig();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		documentsRef.removeEventListener(documentsListener);
+	}
+
+	private void onDocumentInserted(Document remoteDocument) {
+		documents.add(remoteDocument);
+		documentsAdapter.notifyItemInserted(documents.size() - 1);
 	}
 
 	private void onDocumentRemoved(Document remoteDocument) {

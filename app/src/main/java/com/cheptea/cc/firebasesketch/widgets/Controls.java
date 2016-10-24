@@ -28,7 +28,7 @@ public class Controls extends RelativeLayout implements View.OnClickListener {
 
 	private static final String LOG_TAG = CreateDocumentDialog.class.getSimpleName();
 
-	@BindViews({R.id.btn_draw, R.id.btn_move})
+	@BindViews({R.id.btn_draw, R.id.btn_move, R.id.btn_erase_all})
 	List<TextView> tools;
 
 	@BindDrawable(R.drawable.tool_background_selected)

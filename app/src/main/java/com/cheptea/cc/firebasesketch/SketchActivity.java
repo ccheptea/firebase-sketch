@@ -17,8 +17,11 @@ import com.cheptea.cc.firebasesketch.widgets.Controls;
 import com.cheptea.cc.firebasesketch.widgets.FavouriteButton;
 import com.cheptea.cc.firebasesketch.widgets.SketchPad;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 
 import java.util.HashMap;
 
@@ -48,6 +51,7 @@ public class SketchActivity extends AppCompatActivity implements
 	Document document;
 
 	DatabaseReference documentLinesRef;
+	DatabaseReference documentReference;
 	DatabaseReference myLineReference = null;
 
 	HashMap<String, DatabaseReference> lineListeners = new HashMap<>();
@@ -63,6 +67,7 @@ public class SketchActivity extends AppCompatActivity implements
 		pad.setLineTransferListener(this);
 		pad.setPaperSize(new SizeF(document.getWidth(), document.getHeight()));
 
+		documentReference = FirebaseDatabase.getInstance().getReference("documents").child(document.getKey());
 		documentLinesRef = FirebaseDatabase.getInstance().getReference("lines").child(document.getKey());
 
 		documentLinesRef.addChildEventListener(new ChildEventListenerAdapter() {
@@ -87,6 +92,7 @@ public class SketchActivity extends AppCompatActivity implements
 				SketchPoint point = dataSnapshot.getValue(SketchPoint.class);
 				pad.onPrintNewPoint(lineKey, point);
 				if (point.getTypeValue() == SketchPoint.Type.END) {
+					lineListeners.get(lineKey).removeEventListener(this);
 					lineListeners.remove(lineKey);
 				}
 			}
@@ -99,6 +105,11 @@ public class SketchActivity extends AppCompatActivity implements
 			case R.id.btn_move:
 				pad.setControlState(SketchPad.ControlState.MOVE);
 				break;
+			case R.id.btn_erase_all:
+				pad.setControlState(SketchPad.ControlState.ERASE);
+				pad.clearDocument();
+				documentLinesRef.setValue(null);
+				break;
 			default:
 				pad.setControlState(SketchPad.ControlState.DRAW);
 		}
@@ -109,25 +120,52 @@ public class SketchActivity extends AppCompatActivity implements
 		switch (view.getId()) {
 			case R.id.btn_favourite:
 				// handle favourite button
+				updateLikesCount(isOn);
 				break;
 		}
 	}
 
-	// region bridge
+	private void updateLikesCount(final boolean like) {
+		documentReference.runTransaction(new Transaction.Handler() {
+			@Override
+			public Transaction.Result doTransaction(MutableData mutableData) {
+				Document document = mutableData.getValue(Document.class);
+
+				if (document == null) {
+					return Transaction.success(mutableData);
+				}
+
+				if (like) {
+					document.setLikes(document.getLikes() + 1);
+				} else {
+					if (document.getLikes() > 0) {
+						document.setLikes(document.getLikes() - 1);
+					}
+				}
+				mutableData.setValue(document);
+				return Transaction.success(mutableData);
+			}
+
+			@Override
+			public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+			}
+		});
+	}
+
 	@Override
 	public void onNewPoint(SketchPoint sketchPoint) {
 //		pad.onPrintNewPoint(sketchPoint);
+
+		// create a new line node if we just started drawing a new line
 		if (sketchPoint.getTypeValue() == SketchPoint.Type.START) {
 			String newLineKey = documentLinesRef.push().getKey();
 			myLineReference = documentLinesRef.child(newLineKey);
 		}
-
+		// add the new point to the line
 		if (myLineReference != null) {
 			myLineReference.push().setValue(sketchPoint);
 		}
 
 	}
-	// endregion bridge
-
-
 }

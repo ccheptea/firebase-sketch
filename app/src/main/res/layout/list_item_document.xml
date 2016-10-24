@@ -66,6 +66,15 @@
 				android:textColor="@color/subtitle"
 				android:textSize="@dimen/text_size_document_subtitle"/>
 
+			<com.joanzapata.iconify.widget.IconTextView
+				android:id="@+id/likes"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="@dimen/element_space_medium"
+				android:text="{fa-thumbs-up} 10"
+				android:textColor="@color/subtitle"
+				android:textSize="@dimen/text_size_document_subtitle"/>
+
 			<TextView
 				android:id="@+id/date"
 				android:layout_width="match_parent"

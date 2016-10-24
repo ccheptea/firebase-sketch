@@ -55,6 +55,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
 		holder.title.setText(documents.get(position).getTitle());
 		holder.size.setText(context.getString(R.string.template_size, document.getWidth(), document.getHeight()));
+		holder.likes.setText(context.getString(R.string.template_likes, document.getLikes()));
 		holder.date.setText(dateFormat.format(document.getDate()));
 	}
 
@@ -77,6 +78,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
 		@BindView(R.id.size)
 		TextView size;
+
+		@BindView(R.id.likes)
+		TextView likes;
 
 		@BindView(R.id.date)
 		TextView date;

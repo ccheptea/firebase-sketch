@@ -17,8 +17,8 @@ import butterknife.ButterKnife;
 
 public class FavouriteButton extends IconTextView implements View.OnClickListener {
 
-	private final String iconTextOn = "{fa-star}";
-	private final String iconTextOff = "{fa-star-o}";
+	private final String iconTextOn = "{fa-thumbs-up}";
+	private final String iconTextOff = "{fa-thumbs-o-up}";
 	@BindColor(R.color.favourite_on_default)
 	int colorOn;
 	@BindColor(R.color.favourite_off_default)
@@ -44,7 +44,7 @@ public class FavouriteButton extends IconTextView implements View.OnClickListene
 	private void init() {
 		ButterKnife.bind(this, this);
 		setOnClickListener(this);
-		setOn(true);
+		setOn(false);
 	}
 
 	public void setOn(boolean isOn) {

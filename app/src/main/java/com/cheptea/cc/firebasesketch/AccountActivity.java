@@ -67,7 +67,6 @@ public class AccountActivity extends AppCompatActivity implements FirebaseAuth.A
 		getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 		setDebugValues();
-
 	}
 
 	private void setDebugValues() {
