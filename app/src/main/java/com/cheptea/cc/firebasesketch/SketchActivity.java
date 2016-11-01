@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.cheptea.cc.firebasesketch.constants.Keys;
 import com.cheptea.cc.firebasesketch.listeners.ChildEventListenerAdapter;
@@ -16,12 +17,14 @@ import com.cheptea.cc.firebasesketch.ui.SizeF;
 import com.cheptea.cc.firebasesketch.widgets.Controls;
 import com.cheptea.cc.firebasesketch.widgets.FavouriteButton;
 import com.cheptea.cc.firebasesketch.widgets.SketchPad;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -50,11 +53,14 @@ public class SketchActivity extends AppCompatActivity implements
 
 	Document document;
 
+	DatabaseReference userDocumentLikeRef;
 	DatabaseReference documentLinesRef;
 	DatabaseReference documentReference;
 	DatabaseReference myLineReference = null;
 
 	HashMap<String, DatabaseReference> lineListeners = new HashMap<>();
+
+	FirebaseAuth auth = FirebaseAuth.getInstance();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +76,22 @@ public class SketchActivity extends AppCompatActivity implements
 		documentReference = FirebaseDatabase.getInstance().getReference("documents").child(document.getKey());
 		documentLinesRef = FirebaseDatabase.getInstance().getReference("lines").child(document.getKey());
 
+		if (auth.getCurrentUser() != null) {
+			userDocumentLikeRef = FirebaseDatabase.getInstance().getReference("users").child(auth.getCurrentUser().getUid()).child("liked_documents").child(document.getKey());
+			userDocumentLikeRef.addValueEventListener(new ValueEventListener() {
+				@Override
+				public void onDataChange(DataSnapshot dataSnapshot) {
+					Boolean isLiked = dataSnapshot.getValue(Boolean.class);
+					btnFavourite.setOn(isLiked != null && isLiked);
+				}
+
+				@Override
+				public void onCancelled(DatabaseError databaseError) {
+					btnFavourite.setOn(false);
+				}
+			});
+		}
+
 		documentLinesRef.addChildEventListener(new ChildEventListenerAdapter() {
 			@Override
 			public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -77,6 +99,7 @@ public class SketchActivity extends AppCompatActivity implements
 				listenNewLine(dataSnapshot.getKey());
 			}
 		});
+
 
 		toolbar.setTitle(document.getTitle());
 
@@ -126,31 +149,38 @@ public class SketchActivity extends AppCompatActivity implements
 	}
 
 	private void updateLikesCount(final boolean like) {
-		documentReference.runTransaction(new Transaction.Handler() {
-			@Override
-			public Transaction.Result doTransaction(MutableData mutableData) {
-				Document document = mutableData.getValue(Document.class);
+		if (auth.getCurrentUser() != null) {
+			documentReference.child("likes").runTransaction(new Transaction.Handler() {
+				@Override
+				public Transaction.Result doTransaction(MutableData mutableData) {
+					Integer likes = mutableData.getValue(Integer.class);
 
-				if (document == null) {
+					if (likes == null) {
+						return Transaction.success(mutableData);
+					}
+
+					if (like) {
+						likes++;
+					} else {
+						if (likes > 0) {
+							likes--;
+						}
+					}
+					mutableData.setValue(likes);
 					return Transaction.success(mutableData);
 				}
 
-				if (like) {
-					document.setLikes(document.getLikes() + 1);
-				} else {
-					if (document.getLikes() > 0) {
-						document.setLikes(document.getLikes() - 1);
-					}
+				@Override
+				public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
 				}
-				mutableData.setValue(document);
-				return Transaction.success(mutableData);
-			}
+			});
 
-			@Override
-			public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-			}
-		});
+			userDocumentLikeRef.setValue(like);
+		} else {
+			btnFavourite.setOn(false);
+			Toast.makeText(this, "Only logged users can like documents", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override
@@ -166,6 +196,5 @@ public class SketchActivity extends AppCompatActivity implements
 		if (myLineReference != null) {
 			myLineReference.push().setValue(sketchPoint);
 		}
-
 	}
 }

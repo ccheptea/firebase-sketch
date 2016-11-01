@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.cheptea.cc.firebasesketch.adapters.DocumentsAdapter;
 import com.cheptea.cc.firebasesketch.constants.Keys;
@@ -17,6 +18,7 @@ import com.cheptea.cc.firebasesketch.dialogs.CreateDocumentDialog;
 import com.cheptea.cc.firebasesketch.dialogs.RenameDocumentDialog;
 import com.cheptea.cc.firebasesketch.listeners.ChildEventListenerAdapter;
 import com.cheptea.cc.firebasesketch.models.Document;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -54,6 +56,9 @@ public class DocumentsActivity extends AppCompatActivity implements
 
 	DatabaseReference documentsRef = FirebaseDatabase.getInstance().getReference("documents");
 	DatabaseReference linesRef = FirebaseDatabase.getInstance().getReference("lines");
+	DatabaseReference userDocumentsRef;
+
+	FirebaseAuth auth = FirebaseAuth.getInstance();
 
 	ChildEventListenerAdapter documentsListener = new ChildEventListenerAdapter() {
 		@Override
@@ -142,6 +147,18 @@ public class DocumentsActivity extends AppCompatActivity implements
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		if (auth.getCurrentUser() != null) {
+			userDocumentsRef = FirebaseDatabase
+					.getInstance()
+					.getReference("users")
+					.child(auth.getCurrentUser().getUid())
+					.child("created_documents");
+		}
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main_menu, menu);
 		return true;
@@ -176,7 +193,13 @@ public class DocumentsActivity extends AppCompatActivity implements
 
 	@Override
 	public void onCreateDocument(Document document) {
-		documentsRef.push().setValue(document);
+		if (auth.getCurrentUser() != null) {
+			DatabaseReference newDocumentRef = documentsRef.push();
+			newDocumentRef.setValue(document);
+			userDocumentsRef.child(newDocumentRef.getKey()).setValue(true);
+		} else {
+			Toast.makeText(this, "Only logged users can create documents", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override

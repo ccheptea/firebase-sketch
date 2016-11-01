@@ -23,7 +23,7 @@ public class FavouriteButton extends IconTextView implements View.OnClickListene
 	int colorOn;
 	@BindColor(R.color.favourite_off_default)
 	int colorOff;
-	OnOffViewStateListener listener;
+	private OnOffViewStateListener listener;
 	private boolean isOn = false;
 
 	public FavouriteButton(Context context) {
