@@ -3,8 +3,6 @@ package com.cheptea.cc.firebasesketch.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.firebase.database.Exclude;
-
 /**
  * Sketch Document specs.
  * Created by constantin.cheptea on 03/10/16.
@@ -22,7 +20,7 @@ public class Document implements Parcelable {
 			return new Document[size];
 		}
 	};
-	@Exclude
+
 	private String key; // used only locally, not need to duplicate it in the database
 	private String title;
 	private int width; // inch

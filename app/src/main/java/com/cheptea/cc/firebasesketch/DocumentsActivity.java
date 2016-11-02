@@ -10,20 +10,12 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.cheptea.cc.firebasesketch.adapters.DocumentsAdapter;
 import com.cheptea.cc.firebasesketch.constants.Keys;
 import com.cheptea.cc.firebasesketch.dialogs.CreateDocumentDialog;
 import com.cheptea.cc.firebasesketch.dialogs.RenameDocumentDialog;
-import com.cheptea.cc.firebasesketch.listeners.ChildEventListenerAdapter;
 import com.cheptea.cc.firebasesketch.models.Document;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,35 +46,6 @@ public class DocumentsActivity extends AppCompatActivity implements
 	DocumentsAdapter documentsAdapter;
 	List<Document> documents = new ArrayList<>();
 
-	DatabaseReference documentsRef = FirebaseDatabase.getInstance().getReference("documents");
-	DatabaseReference linesRef = FirebaseDatabase.getInstance().getReference("lines");
-	DatabaseReference userDocumentsRef;
-
-	FirebaseAuth auth = FirebaseAuth.getInstance();
-
-	ChildEventListenerAdapter documentsListener = new ChildEventListenerAdapter() {
-		@Override
-		public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-			Document document = dataSnapshot.getValue(Document.class);
-			document.setKey(dataSnapshot.getKey());
-			onDocumentInserted(document);
-		}
-
-		@Override
-		public void onChildRemoved(DataSnapshot dataSnapshot) {
-			Document document = dataSnapshot.getValue(Document.class);
-			document.setKey(dataSnapshot.getKey());
-			onDocumentRemoved(document);
-		}
-
-		@Override
-		public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-			Document document = dataSnapshot.getValue(Document.class);
-			document.setKey(dataSnapshot.getKey());
-			onDocumentChanged(document);
-		}
-	};
-
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -96,16 +59,11 @@ public class DocumentsActivity extends AppCompatActivity implements
 		documentsListView.setHasFixedSize(true);
 		documentsListView.setLayoutManager(new LinearLayoutManager(this));
 		documentsListView.setAdapter(documentsAdapter);
-
-		documentsRef.addChildEventListener(documentsListener);
-
-		initRemoteConfig();
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		documentsRef.removeEventListener(documentsListener);
 	}
 
 	private void onDocumentInserted(Document remoteDocument) {
@@ -130,32 +88,6 @@ public class DocumentsActivity extends AppCompatActivity implements
 			if (documents.get(i).getKey().equals(key)) return i;
 		}
 		return -1;
-	}
-
-	private void initRemoteConfig() {
-		FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.getInstance();
-		FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-				.setDeveloperModeEnabled(BuildConfig.DEBUG)
-				.build();
-		remoteConfig.setConfigSettings(configSettings);
-
-		remoteConfig.setDefaults(R.xml.remote_firesketch_defaults);
-		remoteConfig.fetch();
-		remoteConfig.activateFetched();
-
-		Log.d(LOG_TAG, remoteConfig.getString(REMOTE_CONFIG_TEST));
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		if (auth.getCurrentUser() != null) {
-			userDocumentsRef = FirebaseDatabase
-					.getInstance()
-					.getReference("users")
-					.child(auth.getCurrentUser().getUid())
-					.child("created_documents");
-		}
 	}
 
 	@Override
@@ -193,24 +125,17 @@ public class DocumentsActivity extends AppCompatActivity implements
 
 	@Override
 	public void onCreateDocument(Document document) {
-		if (auth.getCurrentUser() != null) {
-			DatabaseReference newDocumentRef = documentsRef.push();
-			newDocumentRef.setValue(document);
-			userDocumentsRef.child(newDocumentRef.getKey()).setValue(true);
-		} else {
-			Toast.makeText(this, "Only logged users can create documents", Toast.LENGTH_SHORT).show();
-		}
+		onDocumentInserted(document);
 	}
 
 	@Override
 	public void onNewDocumentTitle(Document document, String newTitle) {
 		document.setTitle(newTitle);
-		documentsRef.child(document.getKey()).setValue(document);
+		onDocumentChanged(document);
 	}
 
 	private void removeDocument(Document document) {
-		documentsRef.child(document.getKey()).setValue(null);
-		linesRef.child(document.getKey()).setValue(null);
+		onDocumentRemoved(document);
 	}
 
 	private void promptCreateDocumentDialog() {

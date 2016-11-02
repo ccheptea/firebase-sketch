@@ -2,9 +2,8 @@ package com.cheptea.cc.firebasesketch.models;
 
 import android.support.annotation.NonNull;
 
-import com.google.firebase.database.Exclude;
-
 /**
+ * Point coordinates with extra type field {START, JOINT, END} used for line management
  * Created by constantin.cheptea on 19/09/16.
  */
 public class SketchPoint {
@@ -43,14 +42,9 @@ public class SketchPoint {
 		return this.type.name();
 	}
 
-	@Exclude
+	//	@Exclude
 	public void setType(Type type) {
 		this.type = type;
-	}
-
-	@Exclude
-	public Type getTypeValue() {
-		return type;
 	}
 
 	public void setType(String typeString) {
@@ -58,6 +52,11 @@ public class SketchPoint {
 			this.type = null;
 		else
 			this.type = Type.valueOf(typeString);
+	}
+
+	//	@Exclude
+	public Type getTypeValue() {
+		return type;
 	}
 
 	@Override

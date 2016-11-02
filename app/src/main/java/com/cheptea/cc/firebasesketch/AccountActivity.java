@@ -2,7 +2,6 @@ package com.cheptea.cc.firebasesketch;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,10 +13,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import butterknife.BindView;
@@ -30,7 +25,7 @@ import butterknife.OnClick;
  * Created by constantin.cheptea on 13/10/16.
  */
 
-public class AccountActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
+public class AccountActivity extends AppCompatActivity {
 
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
@@ -51,8 +46,6 @@ public class AccountActivity extends AppCompatActivity implements FirebaseAuth.A
 	EditText passwordInputView;
 
 	ProgressDialog progressDialog;
-
-	FirebaseAuth auth = FirebaseAuth.getInstance();
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,13 +72,11 @@ public class AccountActivity extends AppCompatActivity implements FirebaseAuth.A
 	@Override
 	protected void onStart() {
 		super.onStart();
-		auth.addAuthStateListener(this);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		auth.removeAuthStateListener(this);
 	}
 
 	@Override
@@ -101,19 +92,7 @@ public class AccountActivity extends AppCompatActivity implements FirebaseAuth.A
 	@OnClick(R.id.btn_sign_up)
 	public void signUp() {
 		if (fieldsAreValid()) {
-			popSignInProgressDialog();
-			auth.createUserWithEmailAndPassword(emailInputView.getText().toString(), passwordInputView.getText().toString())
-					.addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-						@Override
-						public void onComplete(@NonNull Task<AuthResult> task) {
-							closeProgressDialog();
-							if (task.isSuccessful()) {
-								Toast.makeText(AccountActivity.this, "Sign up successful", Toast.LENGTH_SHORT).show();
-							} else {
-								Toast.makeText(AccountActivity.this, "Sign up failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-							}
-						}
-					});
+			// sign up here
 		} else {
 			Toast.makeText(AccountActivity.this, "Email & Password cannot be empty!", Toast.LENGTH_SHORT).show();
 		}
@@ -122,19 +101,7 @@ public class AccountActivity extends AppCompatActivity implements FirebaseAuth.A
 	@OnClick(R.id.btn_sign_in)
 	public void signIn() {
 		if (fieldsAreValid()) {
-			popSignInProgressDialog();
-			auth.signInWithEmailAndPassword(emailInputView.getText().toString(), passwordInputView.getText().toString())
-					.addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-						@Override
-						public void onComplete(@NonNull Task<AuthResult> task) {
-							closeProgressDialog();
-							if (task.isSuccessful()) {
-								Toast.makeText(AccountActivity.this, "Sign in successful", Toast.LENGTH_SHORT).show();
-							} else {
-								Toast.makeText(AccountActivity.this, "Sign in failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-							}
-						}
-					});
+			// sign in here
 		} else {
 			Toast.makeText(AccountActivity.this, "Email & Password cannot be empty!", Toast.LENGTH_SHORT).show();
 		}
@@ -146,18 +113,9 @@ public class AccountActivity extends AppCompatActivity implements FirebaseAuth.A
 
 	@OnClick(R.id.btn_sign_out)
 	public void signOut() {
-		auth.signOut();
+
 	}
 
-	@Override
-	public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-		FirebaseUser user = firebaseAuth.getCurrentUser();
-		if (user == null) {
-			updateUIAfterSignOut();
-		} else {
-			updateUIAfterSignIn(user);
-		}
-	}
 
 	private void updateUIAfterSignOut() {
 		containerLoginForm.setVisibility(View.VISIBLE);

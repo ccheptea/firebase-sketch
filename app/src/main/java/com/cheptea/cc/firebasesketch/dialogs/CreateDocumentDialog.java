@@ -12,14 +12,12 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.cheptea.cc.firebasesketch.R;
 import com.cheptea.cc.firebasesketch.constants.Keys;
 import com.cheptea.cc.firebasesketch.models.Document;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -48,7 +46,7 @@ public class CreateDocumentDialog extends DialogFragment implements Keys {
 
 	@BindString(R.string.title_default_document_title)
 	String defaultDocumentTitle;
-	FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.getInstance();
+
 	private CreateDocumentDialogListener listener;
 
 	@Override
@@ -81,14 +79,14 @@ public class CreateDocumentDialog extends DialogFragment implements Keys {
 	}
 
 	private void setDocumentSizes() {
-		String[] sizes = remoteConfig.getString(REMOTE_CONFIG_DOCUMENT_SIZES).split(",");
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, sizes);
+//		String[] sizes = remoteConfig.getString(REMOTE_CONFIG_DOCUMENT_SIZES).split(",");
+//		ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, sizes);
 
-		widthSpinner.setAdapter(adapter);
-		heightSpinner.setAdapter(adapter);
+//		widthSpinner.setAdapter(adapter);
+//		heightSpinner.setAdapter(adapter);
 
-		widthSpinner.setSelection((int) remoteConfig.getLong(REMOTE_CONFIG_DOCUMENT_SIZE_ITEM_SELECTED));
-		heightSpinner.setSelection((int) remoteConfig.getLong(REMOTE_CONFIG_DOCUMENT_SIZE_ITEM_SELECTED));
+//		widthSpinner.setSelection((int) remoteConfig.getLong(REMOTE_CONFIG_DOCUMENT_SIZE_ITEM_SELECTED));
+//		heightSpinner.setSelection((int) remoteConfig.getLong(REMOTE_CONFIG_DOCUMENT_SIZE_ITEM_SELECTED));
 	}
 
 	private Document createDocument() {
