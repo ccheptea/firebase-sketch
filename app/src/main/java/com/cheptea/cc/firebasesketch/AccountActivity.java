@@ -7,13 +7,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.firebase.auth.FirebaseUser;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -117,17 +114,17 @@ public class AccountActivity extends AppCompatActivity {
 	}
 
 
-	private void updateUIAfterSignOut() {
-		containerLoginForm.setVisibility(View.VISIBLE);
-		containerAccountInfo.setVisibility(View.GONE);
-	}
+//	private void updateUIAfterSignOut() {
+//		containerLoginForm.setVisibility(View.VISIBLE);
+//		containerAccountInfo.setVisibility(View.GONE);
+//	}
 
-	private void updateUIAfterSignIn(FirebaseUser user) {
-		displayNameView.setText(user.getEmail());
-
-		containerLoginForm.setVisibility(View.GONE);
-		containerAccountInfo.setVisibility(View.VISIBLE);
-	}
+//	private void updateUIAfterSignIn(FirebaseUser user) {
+//		displayNameView.setText(user.getEmail());
+//
+//		containerLoginForm.setVisibility(View.GONE);
+//		containerAccountInfo.setVisibility(View.VISIBLE);
+//	}
 
 	private void popSignInProgressDialog() {
 		popProgressDialog(getString(R.string.title_progress), getString(R.string.label_sign_in_progress));

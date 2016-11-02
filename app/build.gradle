@@ -31,6 +31,8 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.1.0'
 
     compile 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2'
+
+    // Firebase
 }
 
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.gms.google-services'
