@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="colorPrimary">#3F51B5</color>
+	<color name="colorPrimaryDark">#303F9F</color>
+	<color name="colorAccent">#0099cc</color>
+
+	<!--text colors-->
+	<color name="subtitle">#666</color>
+
+	<color name="white">#fff</color>
+	<color name="gray_lighter">#eee</color>
+	<color name="gray_light">#bbb</color>
+	<color name="gray_medium">#999</color>
+	<color name="gray_dark">#555</color>
+
+	<color name="tool_selected">#3b9ee4</color>
+	<color name="tool_normal">#00000000</color>
+	<color name="tool_selected_text">#fff</color>
+	<color name="tool_normal_text">#3b9ee4</color>
+
+	<color name="paper_margin">#eee</color>
+
+	<!-- favourite button -->
+	<color name="favourite_on_default">#f9ce79</color>
+	<color name="favourite_off_default">#fff</color>
+
+	<color name="btn_primary">#4ab43c</color>
+	<color name="btn_primary_pressed">#3f9933</color>
+	<color name="btn_secondary">#de3907</color>
+	<color name="btn_secondary_pressed">#ce3406</color>
+</resources>

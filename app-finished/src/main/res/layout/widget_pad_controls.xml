@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.cheptea.cc.firebasesketch.widgets.Controls
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/controls"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_below="@+id/toolbar"
+	android:background="@color/paper_margin"
+	android:orientation="horizontal"
+	android:padding="@dimen/element_space_medium">
+
+	<com.joanzapata.iconify.widget.IconTextView
+		android:id="@+id/btn_move"
+		android:layout_width="@dimen/tool_button_side"
+		android:layout_height="@dimen/tool_button_side"
+		android:background="@drawable/tool_background_normal"
+		android:gravity="center"
+		android:text="{fa-arrows}"
+		android:textColor="@color/tool_selected"
+		android:textSize="@dimen/tool_icon_size"/>
+
+	<com.joanzapata.iconify.widget.IconTextView
+		android:id="@+id/btn_draw"
+		android:layout_width="@dimen/tool_button_side"
+		android:layout_height="@dimen/tool_button_side"
+		android:layout_marginLeft="@dimen/element_space_large"
+		android:layout_toRightOf="@+id/btn_move"
+		android:background="@drawable/tool_background_selected"
+		android:gravity="center"
+		android:text="{fa-pencil}"
+		android:textColor="#fff"
+		android:textSize="@dimen/tool_icon_size"/>
+
+	<com.joanzapata.iconify.widget.IconTextView
+		android:id="@+id/btn_erase_all"
+		android:layout_width="@dimen/tool_button_side"
+		android:layout_height="@dimen/tool_button_side"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:layout_gravity="right"
+		android:background="@drawable/tool_background_normal"
+		android:gravity="center"
+		android:text="{fa-eraser}"
+		android:textColor="@color/tool_selected"
+		android:textSize="@dimen/tool_icon_size"/>
+</com.cheptea.cc.firebasesketch.widgets.Controls>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="wrap_content"
+	android:layout_height="match_parent"
+	tools:context="com.cheptea.cc.firebasesketch.SketchActivity">
+
+	<!--<include layout="@layout/toolbar"/>-->
+
+	<android.support.v7.widget.Toolbar
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		xmlns:app="http://schemas.android.com/apk/res-auto"
+		android:id="@+id/toolbar"
+		android:layout_width="match_parent"
+		android:layout_height="?attr/actionBarSize"
+		android:background="?attr/colorPrimary"
+		android:elevation="4dp"
+		android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+		app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+		<com.cheptea.cc.firebasesketch.widgets.FavouriteButton
+			android:id="@+id/btn_favourite"
+			android:layout_width="@dimen/tool_button_side"
+			android:layout_height="@dimen/tool_button_side"
+			android:layout_alignParentEnd="true"
+			android:layout_alignParentRight="true"
+			android:layout_gravity="right"
+			android:layout_marginRight="@dimen/element_space_medium"
+			android:gravity="center"
+			android:text="{fa-star-o}"
+			android:textColor="@color/tool_selected_text"
+			android:textSize="25dp"/>
+	</android.support.v7.widget.Toolbar>
+
+	<include layout="@layout/widget_pad_controls"/>
+
+	<com.cheptea.cc.firebasesketch.widgets.SketchPad
+		android:id="@+id/pad"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_below="@+id/controls"
+		android:background="#fff"/>
+</RelativeLayout>
