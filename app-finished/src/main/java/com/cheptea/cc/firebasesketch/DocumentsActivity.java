@@ -2,6 +2,7 @@ package com.cheptea.cc.firebasesketch;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,8 @@ import com.cheptea.cc.firebasesketch.dialogs.CreateDocumentDialog;
 import com.cheptea.cc.firebasesketch.dialogs.RenameDocumentDialog;
 import com.cheptea.cc.firebasesketch.listeners.ChildEventListenerAdapter;
 import com.cheptea.cc.firebasesketch.models.Document;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
@@ -133,15 +136,21 @@ public class DocumentsActivity extends AppCompatActivity implements
 	}
 
 	private void initRemoteConfig() {
-		FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.getInstance();
+		final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.getInstance();
 		FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
 				.setDeveloperModeEnabled(BuildConfig.DEBUG)
 				.build();
 		remoteConfig.setConfigSettings(configSettings);
 
 		remoteConfig.setDefaults(R.xml.remote_firesketch_defaults);
-		remoteConfig.fetch();
-		remoteConfig.activateFetched();
+		remoteConfig.fetch().addOnCompleteListener(this, new OnCompleteListener<Void>() {
+			@Override
+			public void onComplete(@NonNull Task<Void> task) {
+				if (task.isSuccessful()) {
+					remoteConfig.activateFetched();
+				}
+			}
+		});
 
 		Log.d(LOG_TAG, remoteConfig.getString(REMOTE_CONFIG_TEST));
 	}

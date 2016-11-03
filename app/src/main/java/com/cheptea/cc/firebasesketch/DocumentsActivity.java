@@ -123,6 +123,17 @@ public class DocumentsActivity extends AppCompatActivity implements
 		Log.d(LOG_TAG, document.toString());
 	}
 
+	private void promptCreateDocumentDialog() {
+		CreateDocumentDialog createDocumentDialog = new CreateDocumentDialog();
+		createDocumentDialog.show(getFragmentManager(), CreateDocumentDialog.class.getSimpleName());
+	}
+
+	private void promptRenameDocumentDialog(Document document) {
+		RenameDocumentDialog renameDocumentDialog = RenameDocumentDialog.newInstance(document);
+		renameDocumentDialog.show(getFragmentManager(), RenameDocumentDialog.class.getSimpleName());
+	}
+
+	// region METHODS TO REIMPLEMENT
 	@Override
 	public void onCreateDocument(Document document) {
 		onDocumentInserted(document);
@@ -137,14 +148,5 @@ public class DocumentsActivity extends AppCompatActivity implements
 	private void removeDocument(Document document) {
 		onDocumentRemoved(document);
 	}
-
-	private void promptCreateDocumentDialog() {
-		CreateDocumentDialog createDocumentDialog = new CreateDocumentDialog();
-		createDocumentDialog.show(getFragmentManager(), CreateDocumentDialog.class.getSimpleName());
-	}
-
-	private void promptRenameDocumentDialog(Document document) {
-		RenameDocumentDialog renameDocumentDialog = RenameDocumentDialog.newInstance(document);
-		renameDocumentDialog.show(getFragmentManager(), RenameDocumentDialog.class.getSimpleName());
-	}
+	// endregion END METHODS TO REIMPLEMENT
 }
